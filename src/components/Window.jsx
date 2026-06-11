@@ -6,6 +6,7 @@ function Window( {isOpen, onClose} ) {
 
     if (!isOpen) return null;
 
+
     return (
         <Rnd
             default={{ x, y, width: 900, height: 600 }}
