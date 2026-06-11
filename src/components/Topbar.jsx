@@ -6,8 +6,8 @@ function Topbar() {
     useEffect(() => {
         function updateTime() {
             const date = new Date();
-            const hours = date.getHours();
-            const minutes = date.getMinutes();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
             setTime(hours + ":" + minutes);
         }
         updateTime()
@@ -16,11 +16,11 @@ function Topbar() {
         return () => clearInterval(interval)
     })
     return (
-        <div className='flex justify-between items-center px-4 py-3 border-b border-[#00ffc840] bg-[#00102880] font-mono '>
-            <span className='text-[#00ffc8] text-xs tracking-widest'>
+        <div className='flex justify-between items-center px-4 py-3 border-b border-[#00ffc840] bg-[#00102880]'>
+            <span className='text-[#00ffc8] text-xl tracking-widest '>
                 MIDO.OS v1.0
             </span>
-            <span className='text-[#00ffc8] text-xs'>
+            <span className='text-[#00ffc8] text-xl'>
                 {time} - Oslo, NO
             </span>
         </div>

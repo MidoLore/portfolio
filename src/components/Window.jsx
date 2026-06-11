@@ -13,9 +13,9 @@ function Window({ isOpen, onClose }) {
             minHeight={240}
             minWidth={300}
         >
-            <div className='w-full h-full rounded-2xl border border-[#00ffc840] bg-[#0a0f1e] font-mono'>
+            <div className='w-full h-full rounded-2xl border border-[#00ffc840] bg-[#0a0f1e] '>
                 <div className='rounded-t-2xl bg-[#00102880] px-4 py-3 flex items-center justify-between border-b border-[#00ffc840]'>
-                    <h1 className='text-[#00ffc8] text-sm tracking-widest'>Home</h1>
+                    <h1 className='text-[#00ffc8] text-xl tracking-widest '>Home</h1>
                     <div className='flex items-center gap-2'>
                         <button
                             onClick={onClose}
