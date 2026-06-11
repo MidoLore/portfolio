@@ -10,6 +10,8 @@ function Window({ isOpen, onClose }) {
         <Rnd
             default={{ x, y, width: 900, height: 600 }}
             bounds="#desktop"
+            minHeight={240}
+            minWidth={300}
         >
             <div className='w-full h-full rounded-2xl border border-[#00ffc840] bg-[#0a0f1e] font-mono'>
                 <div className='rounded-t-2xl bg-[#00102880] px-4 py-3 flex items-center justify-between border-b border-[#00ffc840]'>
