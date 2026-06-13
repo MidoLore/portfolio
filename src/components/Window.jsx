@@ -15,7 +15,6 @@ function Window({ isOpen, onClose, title, children, onFocus, isActive, width, he
             onMouseDown={onFocus}
             style={{ zIndex: isActive ? 10 : 1 }}
         >
-
             <div className='w-full h-full rounded-2xl border border-[#00ffc840] bg-[#0a0f1e] '>
                 <div className='rounded-t-2xl bg-[#00102880] px-4 py-3 flex items-center justify-between border-b border-[#00ffc840]'>
                     <h1 className='text-xl tracking-widest '>{title}</h1>
