@@ -17,10 +17,10 @@ function Topbar() {
     })
     return (
         <div className='flex justify-between items-center px-4 py-3 border-b border-[#00ffc840] bg-[#00102880]'>
-            <span className='text-[#00ffc8] text-xl tracking-widest '>
+            <span className='text-xl tracking-widest '>
                 MIDO.OS v1.0
             </span>
-            <span className='text-[#00ffc8] text-xl'>
+            <span className='text-xl'>
                 {time} - Oslo, NO
             </span>
         </div>
