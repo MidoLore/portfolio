@@ -1,6 +1,6 @@
 import { Rnd } from 'react-rnd'
 
-function Window({ isOpen, onClose, title, children, width, height}) {
+function Window({ isOpen, onClose, title, children, onFocus, isActive, width, height}) {
     const x = window.innerWidth / 2 - 450;
     const y = window.innerHeight / 2 - 300;
 
@@ -12,6 +12,8 @@ function Window({ isOpen, onClose, title, children, width, height}) {
             bounds="#desktop"
             minHeight={240}
             minWidth={300}
+            onMouseDown={onFocus}
+            style={{ zIndex: isActive ? 10 : 1 }}
         >
 
             <div className='w-full h-full rounded-2xl border border-[#00ffc840] bg-[#0a0f1e] '>

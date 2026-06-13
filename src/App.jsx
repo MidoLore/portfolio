@@ -11,6 +11,8 @@ function App() {
         contact: false,
     });
 
+    const [activeWindow, setActiveWindow] = useState(null);
+
     function openWindow(name) {
         setWindows({ ...windows, [name]: true })
     }
@@ -37,11 +39,11 @@ function App() {
                 <Icons title="ABOUT ME" icon={""} onClick={() => openWindow('about') } />
                 <Icons title="PROJECTS" onClick={() => openWindow('projects')} />
 
-                <Window title="ABOUT" isOpen={windows.about} onClose={() => closeWindow('about')} width={900} height={600}>
+                <Window title="ABOUT ME" isOpen={windows.about} onClose={() => closeWindow('about')} onFocus={() => setActiveWindow('about')} isActive={activeWindow === 'about'} width={900} height={600}>
                     <p>Hi I'm Mido</p>
                     <p>I study at UiO</p>
                 </Window>
-                <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} width={600} height={300} />
+                <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} onFocus={() => setActiveWindow('projects')} width={600} height={300} />
             </div>
 
         </div>
