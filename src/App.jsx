@@ -37,8 +37,47 @@ function App() {
                     backgroundSize: '20px 20px'
                 }}
             >
-                <Icons title="ABOUT ME" icon={""} onClick={() => openWindow('about') } />
-                <Icons title="PROJECTS" onClick={() => openWindow('projects')} />
+                <div className='absolute top-5 left-4 flex flex-col gap-4'>
+                    <Icons
+                        title="ABOUT ME"
+                        icon={
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M5 20a7 7 0 0 1 14 0" />
+                            </svg>
+                        }
+                        onClick={() => openWindow('about')}
+                    />
+                    <Icons
+                        title="PROJECTS"
+                        icon={
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                            </svg>
+                        }
+                        onClick={() => openWindow('projects')}
+                    />
+                    <Icons
+                        title="SKILLS"
+                        icon={
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M8 6l-5 6 5 6" />
+                                <path d="M16 6l5 6-5 6" />
+                            </svg>
+                        }
+                        onClick={() => openWindow('skills')}
+                    />
+                        <Icons
+                            title="CONTACT"
+                            icon={
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                    <path d="M3 7l9 6 9-6" />
+                                </svg>
+                            }
+                            onClick={() => openWindow('contact')}
+                        />
+                </div>
 
                 <Window
                     title="ABOUT ME"
@@ -91,6 +130,8 @@ function App() {
                     </div>
                 </Window>
                 <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} onFocus={() => setActiveWindow('projects')} width={600} height={300} />
+                <Window title="SKILLS" isOpen={windows.skills} onClose={() => closeWindow('skills')} onFocus={() => setActiveWindow('skills')} width={600} height={300} />
+                <Window title="CONTACT" isOpen={windows.contact} onClose={() => closeWindow('contact')} onFocus={() => setActiveWindow('contact')} width={600} height={300} />
             </div>
 
         </div>
