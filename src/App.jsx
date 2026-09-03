@@ -9,6 +9,7 @@ function App() {
         projects: false,
         skills: false,
         contact: false,
+        steamstats: false,
     });
 
     const [activeWindow, setActiveWindow] = useState(null);
@@ -124,12 +125,39 @@ function App() {
                         <div>
                             <h2 className='text-3xl tracking-widest mb-2'>LANGUAGES</h2>
                             <p className='text-xl opacity-60'>Norwegian – Fluent</p>
-                            <p className='text-xl opacity-60'>English – Strong written and spoken</p>
+                            <p className='text-xl opacity-60'>English – Fluent</p>
                             <p className='text-xl opacity-60'>Somali – Native</p>
                         </div>
                     </div>
                 </Window>
-                <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} onFocus={() => setActiveWindow('projects')} width={600} height={300} />
+                <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} onFocus={() => setActiveWindow('projects')} isActive={activeWindow === 'projects'} width={600} height={300}>
+                    <div className='p-6 grid grid-cols-4 gap-4 overflow-y-auto absolute inset-0 top-13'>
+                        <Icons
+                            title="SteamStats"
+                            bare
+                            icon={
+                                <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                </svg>
+                            }
+                            onClick={() => openWindow('steamstats')}
+                        />
+                    </div>
+                </Window>
+                <Window title="SteamStats" isOpen={windows.steamstats} onClose={() => closeWindow('steamstats')} onFocus={() => setActiveWindow('steamstats')} isActive={activeWindow === 'steamstats'} width={700} height={500}>
+                    <div className='p-6 overflow-y-auto absolute inset-0 top-13'>
+                        <h2 className='text-3xl tracking-widest mb-3'>SteamStats</h2>
+                        <p className='text-lg opacity-80 mb-4'>A SteamDB-style analytics tool for exploring 171k+ games. tag trends, tag combo gaps, and review rankings.</p>
+                        <div className='flex flex-wrap gap-2'>
+                            {['React', 'FastAPI', 'SQLite', 'Python'].map(t => (
+                                <span key={t} className='border border-[#00ffc840] px-3 py-1 text-lg tracking-widest hover:bg-[#00ffc820]'>{t}</span>
+                            ))}
+                        </div>
+                        <a href="https://github.com/MidoLore/steam-stats" target="_blank" rel="noopener noreferrer" className='inline-block mt-6 text-lg tracking-widest text-[#00ffc8] hover:underline'>
+                            View on GitHub →
+                        </a>
+                    </div>
+                </Window>
                 <Window title="SKILLS" isOpen={windows.skills} onClose={() => closeWindow('skills')} onFocus={() => setActiveWindow('skills')} width={600} height={300} />
                 <Window title="CONTACT" isOpen={windows.contact} onClose={() => closeWindow('contact')} onFocus={() => setActiveWindow('contact')} width={600} height={300} />
             </div>
