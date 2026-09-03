@@ -92,7 +92,7 @@ function App() {
                     <div className='p-6 flex flex-col gap-6 overflow-y-auto absolute inset-0 top-13'>
                         <div className='flex items-center gap-6 border-b border-[#00ffc820] pb-6'>
                             <img
-                                src='/picture.jpg'
+                                src={`${import.meta.env.BASE_URL}picture.jpg`}
                                 alt='Mido'
                                 className='w-50 h-50 rounded-full border-2 border-[#00ffc840] object-cover'
                             />
