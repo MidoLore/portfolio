@@ -1,10 +1,10 @@
 import { Rnd } from 'react-rnd'
 
-function Window({ isOpen, onClose, title, children, onFocus, isActive, width, height}) {
-    const x = window.innerWidth / 2 - 450;
-    const y = window.innerHeight / 2 - 300;
-
+function Window({ isOpen, onClose, title, children, onFocus, isActive, width, height, offset }) {
     if (!isOpen) return null;
+
+    const x = window.innerWidth / 2 - width / 2 + (offset?.x ?? 0);
+    const y = window.innerHeight / 2 - height / 2 + (offset?.y ?? 0);
 
     return (
         <Rnd

@@ -8,15 +8,28 @@ function App() {
         about: false,
         projects: false,
         skills: false,
-        contact: false,
         steamstats: false,
     });
 
+    const skillCategories = {
+        Languages: ['Python', 'Java', 'Kotlin', 'JavaScript', 'C++', 'SQL'],
+        Web: ['React', 'Tailwind', 'HTML/CSS', 'FastAPI', 'Spring Boot'],
+        Tools: ['Git', 'Docker', 'Linux', 'SQLite', 'Unreal Engine'],
+        Also: ['Software Testing', 'Cybersecurity', 'DHIS2'],
+    }
+
     const [activeWindow, setActiveWindow] = useState(null);
 
+    const [positions, setPositions] = useState({});
+
     function openWindow(name) {
-        setWindows({ ...windows, [name]: true })
-        setActiveWindow(name)
+        const offset = {
+            x: Math.floor(Math.random() * 200) - 100, // -100 to +100 px from center
+            y: Math.floor(Math.random() * 120) - 60,
+        };
+        setPositions(p => ({ ...p, [name]: offset }));
+        setWindows(w => ({ ...w, [name]: true }));
+        setActiveWindow(name);
     }
 
     function closeWindow(name) {
@@ -34,8 +47,17 @@ function App() {
                 id="desktop"
                 className='relative flex-1'
                 style={{
-                    backgroundImage: `linear-gradient(#00ffc808 1px, transparent 1px), linear-gradient(90deg, #00ffc810 1px, transparent 1px)`,
-                    backgroundSize: '20px 20px'
+                    backgroundImage: `
+                        linear-gradient(#00ffc808 1px, transparent 1px),
+                        linear-gradient(90deg, #00ffc810 1px, transparent 1px),
+                        repeating-linear-gradient(#00000030 0 2px, transparent 2px 4px),
+                        linear-gradient(#0a0f1ecc, #0a0f1ecc),
+                        url("/portfolio/background.png")
+                    `,
+                    backgroundSize: '20px 20px, 20px 20px, auto, auto, cover',
+                    backgroundPosition: '0 0, 0 0, 0 0, 0 0, center',
+                    backgroundRepeat: 'repeat, repeat, repeat, no-repeat, no-repeat',
+                    imageRendering: 'pixelated',
                 }}
             >
                 <div className='absolute top-5 left-4 flex flex-col gap-4'>
@@ -68,21 +90,12 @@ function App() {
                         }
                         onClick={() => openWindow('skills')}
                     />
-                        <Icons
-                            title="CONTACT"
-                            icon={
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                                    <path d="M3 7l9 6 9-6" />
-                                </svg>
-                            }
-                            onClick={() => openWindow('contact')}
-                        />
                 </div>
 
                 <Window
                     title="ABOUT ME"
                     isOpen={windows.about}
+                    offset={positions.about}
                     onClose={() => closeWindow('about')}
                     onFocus={() => setActiveWindow('about')}
                     isActive={activeWindow === 'about'}
@@ -92,7 +105,7 @@ function App() {
                     <div className='p-6 flex flex-col gap-6 overflow-y-auto absolute inset-0 top-13'>
                         <div className='flex items-center gap-6 border-b border-[#00ffc820] pb-6'>
                             <img
-                                src={`${import.meta.env.BASE_URL}picture.jpg`}
+                                src={"/portfolio/picture.jpg"}
                                 alt='Mido'
                                 className='w-50 h-50 rounded-full border-2 border-[#00ffc840] object-cover'
                             />
@@ -130,7 +143,7 @@ function App() {
                         </div>
                     </div>
                 </Window>
-                <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} onFocus={() => setActiveWindow('projects')} isActive={activeWindow === 'projects'} width={600} height={300}>
+                <Window title="PROJECTS" isOpen={windows.projects} onClose={() => closeWindow('projects')} onFocus={() => setActiveWindow('projects')} isActive={activeWindow === 'projects'} width={600} height={300} offset={positions.projects}>
                     <div className='p-6 grid grid-cols-4 gap-4 overflow-y-auto absolute inset-0 top-13'>
                         <Icons
                             title="SteamStats"
@@ -144,10 +157,15 @@ function App() {
                         />
                     </div>
                 </Window>
-                <Window title="SteamStats" isOpen={windows.steamstats} onClose={() => closeWindow('steamstats')} onFocus={() => setActiveWindow('steamstats')} isActive={activeWindow === 'steamstats'} width={700} height={500}>
-                    <div className='p-6 overflow-y-auto absolute inset-0 top-13'>
+                <Window title="SteamStats" isOpen={windows.steamstats} onClose={() => closeWindow('steamstats')} onFocus={() => setActiveWindow('steamstats')} isActive={activeWindow === 'steamstats'} width={700} height={500} offset={positions.steamstats}>
+                <div className='p-6 overflow-y-auto absolute inset-0 top-13'>
                         <h2 className='text-3xl tracking-widest mb-3'>SteamStats</h2>
                         <p className='text-lg opacity-80 mb-4'>A SteamDB-style analytics tool for exploring 171k+ games. tag trends, tag combo gaps, and review rankings.</p>
+                        <img
+                            src={`./portfolio/steamstats.png`}
+                            alt='SteamStats screenshot'
+                            className='w-full mb-4 border border-[#00ffc840] rounded'
+                        />
                         <div className='flex flex-wrap gap-2'>
                             {['React', 'FastAPI', 'SQLite', 'Python'].map(t => (
                                 <span key={t} className='border border-[#00ffc840] px-3 py-1 text-lg tracking-widest hover:bg-[#00ffc820]'>{t}</span>
@@ -158,8 +176,31 @@ function App() {
                         </a>
                     </div>
                 </Window>
-                <Window title="SKILLS" isOpen={windows.skills} onClose={() => closeWindow('skills')} onFocus={() => setActiveWindow('skills')} width={600} height={300} />
-                <Window title="CONTACT" isOpen={windows.contact} onClose={() => closeWindow('contact')} onFocus={() => setActiveWindow('contact')} width={600} height={300} />
+                <Window
+                    title="SKILLS"
+                    isOpen={windows.skills}
+                    onClose={() => closeWindow('skills')}
+                    onFocus={() => setActiveWindow('skills')}
+                    isActive={activeWindow === 'skills'}
+                    width={700}
+                    height={500}
+                    offset={positions.skills}
+                >
+                    <div className='p-6 flex flex-col gap-5 overflow-y-auto absolute inset-0 top-13'>
+                        {Object.entries(skillCategories).map(([category, skills]) => (
+                            <div key={category}>
+                                <h2 className='text-2xl tracking-widest mb-2'>{category.toUpperCase()}</h2>
+                                <div className='flex flex-wrap gap-2'>
+                                    {skills.map(skill => (
+                                        <span key={skill} className='border border-[#00ffc840] px-3 py-1 text-lg tracking-widest hover:bg-[#00ffc820]'>
+                            {skill}
+                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Window>
             </div>
 
         </div>
