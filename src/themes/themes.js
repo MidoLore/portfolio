@@ -11,6 +11,7 @@ export const THEMES = {
   gameboy:   { particles: 'none',   colors: { bg: '#0f380f', surface: '#306230', text: '#9bbc0f', accent: '#9bbc0f', accent2: '#8bac0f' } },
   arcade:    { particles: ['stars', 'pixelsH'],  colors: { bg: '#101018', surface: '#1a1a28', text: '#f5f5ff', accent: '#ffe14d', accent2: '#ff4fa3' } },
   datastream: { particles: ['pixelsH', 'pixelsV'], colors: { bg: '#060b16', surface: '#0b1626', text: '#bfefff', accent: '#29d3ff', accent2: '#7b5cff' } },
-  matrix:    { particles: ['glyphs', 'rain'], colors: { bg: '#020602', surface: '#071207', text: '#7dff9a', accent: '#00ff41', accent2: '#00b32c' } },
+  matrix:    { particles: ['glyphs'], colors: { bg: '#020602', surface: '#071207', text: '#7dff9a', accent: '#00ff41', accent2: '#00b32c' } },
+  moss: { particles: 'flow', colors: { bg: '#1c1c1c', surface: '#151515', text: '#d6e8b0', accent: '#a8d84a', accent2: '#6f8f2f' } },
   paper:     { particles: 'none',   scheme: 'light', colors: { bg: '#f2efe6', surface: '#e4dfd0', text: '#1d1d1d', accent: '#e0475b', accent2: '#2f6fdf' } },
 };
