@@ -2,6 +2,11 @@ import Window from './components/Window'
 import {useState} from "react";
 import Topbar from "./components/Topbar.jsx";
 import Icons from "./components/Icons.jsx";
+import ThemeBackground from "./components/ThemeBackground.jsx";
+import ThemePicker from "./components/ThemePicker.jsx";
+
+// theme color at a given opacity, for inline styles
+const mix = (v, pct) => `color-mix(in srgb, var(--${v}) ${pct}%, transparent)`;
 
 function App() {
     const [windows, setWindows] = useState({
@@ -9,6 +14,7 @@ function App() {
         projects: false,
         skills: false,
         steamstats: false,
+        theme: false,
     });
 
     const skillCategories = {
@@ -33,11 +39,11 @@ function App() {
     }
 
     function closeWindow(name) {
-        setWindows({ ...windows, [name]: false })
+        setWindows(w => ({ ...w, [name]: false }))
     }
 
     return (
-        <div className='w-screen h-screen bg-[#0a0f1e] flex flex-col'>
+        <div className='w-screen h-screen bg-bg text-fg flex flex-col'>
 
             <div>
                 <Topbar />
@@ -48,18 +54,15 @@ function App() {
                 className='relative flex-1'
                 style={{
                     backgroundImage: `
-                        linear-gradient(#00ffc808 1px, transparent 1px),
-                        linear-gradient(90deg, #00ffc810 1px, transparent 1px),
-                        repeating-linear-gradient(#00000030 0 2px, transparent 2px 4px),
-                        linear-gradient(#0a0f1ecc, #0a0f1ecc),
-                        url("/portfolio/background.png")
+                        linear-gradient(${mix('accent', 3)} 1px, transparent 1px),
+                        linear-gradient(90deg, ${mix('accent', 6)} 1px, transparent 1px)
                     `,
-                    backgroundSize: '20px 20px, 20px 20px, auto, auto, cover',
-                    backgroundPosition: '0 0, 0 0, 0 0, 0 0, center',
-                    backgroundRepeat: 'repeat, repeat, repeat, no-repeat, no-repeat',
-                    imageRendering: 'pixelated',
+                    backgroundSize: '20px 20px',
                 }}
             >
+                {/* first child: drawn above the wallpaper, below icons and windows */}
+                <ThemeBackground />
+
                 <div className='absolute top-5 left-4 flex flex-col gap-4'>
                     <Icons
                         title="ABOUT ME"
@@ -90,6 +93,18 @@ function App() {
                         }
                         onClick={() => openWindow('skills')}
                     />
+                    <Icons
+                        title="THEME"
+                        icon={
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.4-4-7.8-9-7.8z" />
+                                <circle cx="7.5" cy="11" r="1" />
+                                <circle cx="10" cy="7" r="1" />
+                                <circle cx="14.5" cy="7" r="1" />
+                            </svg>
+                        }
+                        onClick={() => openWindow('theme')}
+                    />
                 </div>
 
                 <Window
@@ -103,11 +118,11 @@ function App() {
                     height={600}
                 >
                     <div className='p-6 flex flex-col gap-6 overflow-y-auto absolute inset-0 top-13'>
-                        <div className='flex items-center gap-6 border-b border-[#00ffc820] pb-6'>
+                        <div className='flex items-center gap-6 border-b border-accent/12 pb-6'>
                             <img
                                 src={"/portfolio/picture.jpg"}
                                 alt='Mido'
-                                className='w-50 h-50 rounded-full border-2 border-[#00ffc840] object-cover'
+                                className='w-50 h-50 rounded-full border-2 border-accent/25 object-cover'
                             />
                             <div>
                                 <h2 className='text-5xl tracking-widest'>Mohamed Muhuyadin</h2>
@@ -128,7 +143,7 @@ function App() {
                             <h2 className='text-3xl tracking-widest mb-2'>SKILLS</h2>
                             <div className='flex flex-wrap gap-2'>
                                 {['Python', 'Java', 'Kotlin', 'Spring Boot', 'SQL', 'HTML', 'CSS', 'JavaScript', 'C++', 'Unreal Engine', 'Docker', 'Git', 'Linux'].map(skill => (
-                                    <span key={skill} className='border border-[#00ffc840] px-3 py-1 text-lg tracking-widest hover:bg-[#00ffc820]'>
+                                    <span key={skill} className='border border-accent/25 px-3 py-1 text-lg tracking-widest hover:bg-accent/12'>
                         {skill}
                     </span>
                                 ))}
@@ -158,20 +173,20 @@ function App() {
                     </div>
                 </Window>
                 <Window title="SteamStats" isOpen={windows.steamstats} onClose={() => closeWindow('steamstats')} onFocus={() => setActiveWindow('steamstats')} isActive={activeWindow === 'steamstats'} width={700} height={500} offset={positions.steamstats}>
-                <div className='p-6 overflow-y-auto absolute inset-0 top-13'>
+                    <div className='p-6 overflow-y-auto absolute inset-0 top-13'>
                         <h2 className='text-3xl tracking-widest mb-3'>SteamStats</h2>
                         <p className='text-lg opacity-80 mb-4'>A SteamDB-style analytics tool for exploring 171k+ games. tag trends, tag combo gaps, and review rankings.</p>
                         <img
                             src={`./portfolio/steamstats.png`}
                             alt='SteamStats screenshot'
-                            className='w-full mb-4 border border-[#00ffc840] rounded'
+                            className='w-full mb-4 border border-accent/25 rounded'
                         />
                         <div className='flex flex-wrap gap-2'>
                             {['React', 'FastAPI', 'SQLite', 'Python'].map(t => (
-                                <span key={t} className='border border-[#00ffc840] px-3 py-1 text-lg tracking-widest hover:bg-[#00ffc820]'>{t}</span>
+                                <span key={t} className='border border-accent/25 px-3 py-1 text-lg tracking-widest hover:bg-accent/12'>{t}</span>
                             ))}
                         </div>
-                        <a href="https://github.com/MidoLore/steam-stats" target="_blank" rel="noopener noreferrer" className='inline-block mt-6 text-lg tracking-widest text-[#00ffc8] hover:underline'>
+                        <a href="https://github.com/MidoLore/steam-stats" target="_blank" rel="noopener noreferrer" className='inline-block mt-6 text-lg tracking-widest text-accent hover:underline'>
                             View on GitHub →
                         </a>
                     </div>
@@ -192,7 +207,7 @@ function App() {
                                 <h2 className='text-2xl tracking-widest mb-2'>{category.toUpperCase()}</h2>
                                 <div className='flex flex-wrap gap-2'>
                                     {skills.map(skill => (
-                                        <span key={skill} className='border border-[#00ffc840] px-3 py-1 text-lg tracking-widest hover:bg-[#00ffc820]'>
+                                        <span key={skill} className='border border-accent/25 px-3 py-1 text-lg tracking-widest hover:bg-accent/12'>
                             {skill}
                         </span>
                                     ))}
@@ -200,6 +215,18 @@ function App() {
                             </div>
                         ))}
                     </div>
+                </Window>
+                <Window
+                    title="THEME"
+                    isOpen={windows.theme}
+                    onClose={() => closeWindow('theme')}
+                    onFocus={() => setActiveWindow('theme')}
+                    isActive={activeWindow === 'theme'}
+                    width={600}
+                    height={380}
+                    offset={positions.theme}
+                >
+                    <ThemePicker />
                 </Window>
             </div>
 

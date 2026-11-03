@@ -15,13 +15,13 @@ function Window({ isOpen, onClose, title, children, onFocus, isActive, width, he
             onMouseDown={onFocus}
             style={{ zIndex: isActive ? 10 : 1 }}
         >
-            <div className='w-full h-full rounded-2xl border border-[#00ffc840] bg-[#0a0f1e] '>
-                <div className='rounded-t-2xl bg-[#00102880] px-4 py-3 flex items-center justify-between border-b border-[#00ffc840]'>
+            <div className='w-full h-full rounded-2xl border border-accent/25 bg-bg '>
+                <div className='rounded-t-2xl bg-surface/50 px-4 py-3 flex items-center justify-between border-b border-accent/25'>
                     <h1 className='text-xl tracking-widest '>{title}</h1>
                     <div className='flex items-center gap-2'>
                         <button
                             onClick={onClose}
-                            className='w-6 h-6 rounded border border-[#00ffc840] bg-transparent hover:bg-[#00ffc820] flex items-center justify-center text-xs leading-none'
+                            className='w-6 h-6 rounded border border-accent/25 bg-transparent hover:bg-accent/12 flex items-center justify-center text-xs leading-none'
                         >
                             ✖
                         </button>

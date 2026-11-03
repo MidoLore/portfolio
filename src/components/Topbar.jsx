@@ -14,9 +14,9 @@ function Topbar() {
         const interval = setInterval(updateTime, 1000)
 
         return () => clearInterval(interval)
-    })
+    }, [])
     return (
-        <div className='flex justify-between items-center px-4 py-3 border-b border-[#00ffc840] bg-[#00102880]'>
+        <div className='flex justify-between items-center px-4 py-3 border-b border-accent/25 bg-surface/50'>
             <span className='text-xl tracking-widest '>
                 MIDO.OS v1.0
             </span>
