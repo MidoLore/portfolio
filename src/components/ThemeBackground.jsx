@@ -4,16 +4,15 @@ import { useTheme } from '../themes/ThemeProvider';
 /* ================= settings ================= */
 const PX = 3;                        // size of one "pixel"
 const GRID = 20;                     // matches the desktop grid (backgroundSize: '20px 20px')
-const GLYPHS = '.,:;irsXAH2359G&@';  // characters used by the glyph effect
+const GLYPHS = '0123456789';         // characters used by the glyph (matrix) effect
 const FONT = 13;
 const MAX_FPS = 60;                  // set to 30 to halve the work on slow machines
 
-// glyphs
-const CLUSTER = [3, 3];              // cluster size in cells: width × height
-const GLYPH_COUNT = 25;              // number of clusters
-const GLYPH_STEP = [30, 60];         // frames between hops (60 ≈ 1 s) — higher = slower
-const GLYPH_SHRINK = [12, 30];       // frames between losing a character — higher = lives longer
-const GLYPH_FLICKER = 0.25;          // chance per frame that EACH character changes
+// glyphs (matrix rain)
+const RAIN_COUNT = 45;               // number of falling streams
+const RAIN_LENGTH = [8, 22];         // trail length in cells
+const RAIN_SPEED = [3, 8];           // frames per cell — lower = faster
+const RAIN_FLICKER = 0.03;           // chance per frame that each trail character changes
 
 // flow
 const FLOW_COUNT = 150;              // number of nodes
@@ -21,13 +20,17 @@ const FLOW_SPEED = 1.1;              // px per frame
 const FLOW_SCALE = 0.0028;           // swirl size — lower = bigger, lazier curves
 const FLOW_PULL = 0.1;               // how hard nodes steer into the flow — lower = more separate roads
 const FLOW_BIAS = 0.25;              // personal angle offset per node (radians) — higher = more spread
-const FLOW_TRAIL = 15;               // trail length (points, one every 2 frames)
+const FLOW_TRAIL = 30;               // trail length (points, one every 2 frames)
+
+// solar system
+const SOLAR_SPEED = 0.0006;          // orbit speed — higher = faster planets
+const SOLAR_TILT = 0.38;             // orbit tilt (1 = seen from above, lower = flatter)
+const SOLAR_CENTER = [0.5, 0.5];     // sun position as a fraction of the screen (keeps the icons clear)
 
 /* ================= internals ================= */
 const COLOR_KEYS = ['text', 'accent', 'accent2']; // theme colors effects can use
 const TEXT = 0, ACCENT = 1, ACCENT2 = 2;
 const LEVELS = 8;                    // opacity steps used for batching
-const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
 
 const between = (r, [lo, hi]) => lo + r() * (hi - lo);
 const randInt = (r, n) => (r() * n) | 0;
@@ -117,6 +120,31 @@ const flyer = (dx, dy) => ({
   },
 });
 
+/* Pixel-disc offsets (in PX blocks) for a given radius, cached */
+const discCache = new Map();
+function discBlocks(rad) {
+  if (!discCache.has(rad)) {
+    const out = [];
+    for (let y = -rad; y <= rad; y++) for (let x = -rad; x <= rad; x++)
+      if (x * x + y * y <= rad * rad + rad * 0.8) out.push(x, y);
+    discCache.set(rad, out);
+  }
+  return discCache.get(rad);
+}
+const snap = (v) => Math.round(v / PX) * PX;
+
+// orbit = fraction of the largest orbit, size = radius in pixel blocks
+const PLANETS = [
+  { orbit: 0.16, size: 1, color: '#b5b0a8' },                // mercury
+  { orbit: 0.24, size: 2, color: '#e8c27a' },                // venus
+  { orbit: 0.33, size: 3, color: '#4f9dff', moon: true },    // earth
+  { orbit: 0.42, size: 2, color: '#e0603a' },                // mars
+  { orbit: 0.58, size: 5, color: '#d9a066' },                // jupiter
+  { orbit: 0.72, size: 4, color: '#e6d3a3', ring: true },    // saturn
+  { orbit: 0.85, size: 3, color: '#7fd6e0' },                // uranus
+  { orbit: 0.97, size: 3, color: '#4b6cff' },                // neptune
+];
+
 /* ================= effects =================
    Particle effects: spawn(w, h, rand, initial) → particle, update(p, dt, w, h, t, rand) → opacity,
    optional draw(p, opacity, painter) (default: a square).
@@ -168,48 +196,135 @@ const EFFECTS = {
   pixelsV: flyer(0, 1),
   pixelsUp: flyer(0, -1),
 
-  // 3×3 blocks of rapidly changing characters hopping slowly along the grid in one direction,
-  // losing characters from the outside in until none are left, then respawning elsewhere
+  // Matrix-style digital rain: streams fall down the grid one cell at a time, the head
+  // writes a new digit as it moves and the trail behind it fades out
   glyphs: {
-    count: GLYPH_COUNT, alpha: 0.7, colors: [ACCENT, TEXT], usesGlyphs: true,
+    count: RAIN_COUNT, alpha: 0.8, colors: [ACCENT], usesGlyphs: true,
     spawn(w, h, r, initial) {
-      const [dx, dy] = DIRS[randInt(r, DIRS.length)];
-      const [cw, ch] = CLUSTER;
-      let cells = [];
-      for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
-        const d = Math.hypot(x - (cw - 1) / 2, (y - (ch - 1) / 2) * 1.5) + r() * 0.8; // outer first
-        cells.push({ ox: x, oy: y, gi: randInt(r, GLYPHS.length), a: 1, dying: false, d });
-      }
-      cells.sort((c1, c2) => c2.d - c1.d);
-      if (initial) cells = cells.slice(randInt(r, cells.length)); // stagger the first batch
       const cols = Math.ceil(w / GRID), rows = Math.ceil(h / GRID);
-      const every = between(r, GLYPH_STEP), shrink = between(r, GLYPH_SHRINK);
-      return { cols, rows, cx: randInt(r, cols), cy: randInt(r, rows), dx, dy, every, wait: r() * every, shrink, shrinkWait: shrink, cells };
+      const len = Math.round(between(r, RAIN_LENGTH));
+      const every = between(r, RAIN_SPEED);
+      return {
+        cols, rows, len, every, wait: r() * every,
+        col: randInt(r, cols),
+        head: initial ? randInt(r, rows + len) - len : -randInt(r, 15), // start above the top (staggered)
+        chars: Array.from({ length: len }, () => randInt(r, GLYPHS.length)), // chars[0] = head
+      };
     },
     update(p, dt, w, h, t, r) {
-      if ((p.wait -= dt) <= 0) { // hop one cell, wrapping at the edges
-        p.cx = (p.cx + p.dx + p.cols) % p.cols;
-        p.cy = (p.cy + p.dy + p.rows) % p.rows;
+      if ((p.wait -= dt) <= 0) { // fall one cell; the head writes a fresh digit
+        p.head++;
+        p.chars.pop();
+        p.chars.unshift(randInt(r, GLYPHS.length));
         p.wait += p.every;
       }
-      if ((p.shrinkWait -= dt) <= 0) {
-        const next = p.cells.find((c) => !c.dying);
-        if (next) next.dying = true;
-        p.shrinkWait += p.shrink;
-      }
-      let alive = 0;
-      for (const c of p.cells) {
-        if (c.dying) c.a -= dt / 15;
-        if (r() < GLYPH_FLICKER * dt) c.gi = randInt(r, GLYPHS.length);
-        if (c.a > 0) alive++;
-      }
-      if (alive < p.cells.length) p.cells = p.cells.filter((c) => c.a > 0);
-      if (!p.cells.length) Object.assign(p, this.spawn(w, h, r, false));
+      for (let k = 1; k < p.chars.length; k++)
+        if (r() < RAIN_FLICKER * dt) p.chars[k] = randInt(r, GLYPHS.length);
+      if (p.head - p.len > p.rows) Object.assign(p, this.spawn(w, h, r, false)); // off screen → new stream
       return 1;
     },
     draw(p, a, painter) {
-      for (const c of p.cells)
-        painter.glyph(p.ci, a * c.a, c.gi, ((p.cx + c.ox) % p.cols) * GRID + 4, ((p.cy + c.oy) % p.rows) * GRID + 1);
+      const x = p.col * GRID + 4;
+      for (let k = 0; k < p.len; k++) {
+        const row = p.head - k;
+        if (row < 0 || row >= p.rows) continue;
+        if (k === 0) painter.glyph(TEXT, a, p.chars[0], x, row * GRID + 1); // bright head
+        else painter.glyph(ACCENT, a * (1 - k / p.len), p.chars[k], x, row * GRID + 1);
+      }
+    },
+  },
+
+  // pixel-art solar system: a glowing sun, tilted dotted orbits and shaded planets
+  solar: {
+    custom: true, alpha: 1,
+    init(w, h, r) {
+      const cx = w * SOLAR_CENTER[0], cy = h * SOLAR_CENTER[1];
+      const maxR = Math.min(w * 0.42, (h * 0.46) / SOLAR_TILT);
+      const planets = PLANETS.map((pl) => ({ ...pl, R: pl.orbit * maxR, a: r() * Math.PI * 2, speed: SOLAR_SPEED / Math.pow(pl.orbit, 1.5), moonA: r() * 6.28 }));
+      return { cx, cy, planets, t: 0 };
+    },
+    update(st, dt) {
+      st.t += dt;
+      for (const pl of st.planets) { pl.a += pl.speed * dt; pl.moonA += 0.04 * dt; }
+    },
+    drawCtx(ctx, st, colors, alpha) {
+      const { cx, cy, planets } = st;
+      const pos = (pl) => [cx + Math.cos(pl.a) * pl.R, cy + Math.sin(pl.a) * pl.R * SOLAR_TILT];
+
+      // dotted orbits
+      ctx.globalAlpha = alpha * 0.35;
+      ctx.fillStyle = colors.accent2;
+      ctx.beginPath();
+      for (const pl of planets) {
+        const dots = Math.max(30, Math.round(pl.R / 6));
+        for (let k = 0; k < dots; k++) {
+          const a = (k / dots) * Math.PI * 2;
+          ctx.rect(snap(cx + Math.cos(a) * pl.R), snap(cy + Math.sin(a) * pl.R * SOLAR_TILT), 2, 2);
+        }
+      }
+      ctx.fill();
+
+      const drawPlanet = (pl) => {
+        const [x0, y0] = pos(pl);
+        const x = snap(x0), y = snap(y0), rad = pl.size;
+        const blocks = discBlocks(rad);
+        // body
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = pl.color;
+        ctx.beginPath();
+        for (let i = 0; i < blocks.length; i += 2) ctx.rect(x + blocks[i] * PX, y + blocks[i + 1] * PX, PX, PX);
+        ctx.fill();
+        // night side (facing away from the sun)
+        const d = Math.hypot(cx - x, cy - y) || 1, ux = (cx - x) / d, uy = (cy - y) / d;
+        ctx.globalAlpha = alpha * 0.5;
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        for (let i = 0; i < blocks.length; i += 2)
+          if (blocks[i] * ux + blocks[i + 1] * uy < -0.15 * rad) ctx.rect(x + blocks[i] * PX, y + blocks[i + 1] * PX, PX, PX);
+        ctx.fill();
+        // saturn's ring
+        if (pl.ring) {
+          ctx.globalAlpha = alpha * 0.8;
+          ctx.fillStyle = pl.color;
+          ctx.beginPath();
+          for (let k = 0; k < 28; k++) {
+            const a = (k / 28) * Math.PI * 2;
+            ctx.rect(snap(x + Math.cos(a) * (rad + 3) * PX), snap(y + Math.sin(a) * (rad + 3) * PX * 0.3), PX, PX);
+          }
+          ctx.fill();
+        }
+        // earth's moon
+        if (pl.moon) {
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = '#cfcfcf';
+          ctx.fillRect(snap(x + Math.cos(pl.moonA) * PX * 6), snap(y + Math.sin(pl.moonA) * PX * 6 * 0.5), PX, PX);
+        }
+      };
+
+      // planets behind the sun first, then the sun, then the ones in front
+      const behind = planets.filter((pl) => Math.sin(pl.a) < 0);
+      const front = planets.filter((pl) => Math.sin(pl.a) >= 0);
+      behind.forEach(drawPlanet);
+
+      // sun: pulsing glow + core
+      const pulse = 0.5 + 0.5 * Math.sin(st.t * 0.03);
+      const sx = snap(cx), sy = snap(cy);
+      [[16, 0.07 + pulse * 0.03], [12, 0.15 + pulse * 0.08], [9, 0.95]].forEach(([rad, a]) => {
+        ctx.globalAlpha = alpha * a;
+        ctx.fillStyle = colors.accent;
+        ctx.beginPath();
+        const blocks = discBlocks(rad);
+        for (let i = 0; i < blocks.length; i += 2) ctx.rect(sx + blocks[i] * PX, sy + blocks[i + 1] * PX, PX, PX);
+        ctx.fill();
+      });
+      ctx.globalAlpha = alpha * 0.6; // hot centre
+      ctx.fillStyle = '#fff6d8';
+      ctx.beginPath();
+      const core = discBlocks(5);
+      for (let i = 0; i < core.length; i += 2) ctx.rect(sx + core[i] * PX - PX, sy + core[i + 1] * PX - PX, PX, PX);
+      ctx.fill();
+
+      front.forEach(drawPlanet);
     },
   },
 
